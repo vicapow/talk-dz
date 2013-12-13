@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    body{ margin: 0; }
+    circle{ fill: purple;}
+  </style>
+  <body>
+    <script src="d3.js"></script>
+    <script src="dz.js"></script>
+    <script>
+var viewport = { width: window.innerWidth, height: window.innerHeight }
+var svg = d3.select('body').append('svg')
+  .attr({width: viewport.width, height: viewport.height})
+var p = dz.projection.perspective()
+var r = 20
+var w = viewport.width, h = viewport.height
+var f = 1000
+var max = Math.max(w, h), min = Math.min(w, h), diff = max - min
+  // screen scaling
+var ranges = [ [ diff / 2, min + diff / 2] , [0, min] ]
+var screenX = d3.scale.linear()
+  .domain([-0.5, 0.5])
+  .range(ranges[w < h ? 1 : 0])
+var screenY = d3.scale.linear()
+  .domain([0.5, -0.5])
+  .range(ranges[w > h ? 1 : 0])
+
+var box = dz.points.grid(3, 3, 3).map(dz.matrix().scale(1).multiVector)
+
+p.camera().lookAt([0, 0, 0.5])
+
+function transform(box, t){
+  return box.map(function(p){ return p.slice(0) }) // copy points
+    .map(dz.matrix().rotateX(t).rotateY(t).rotateZ(t).multiVector)
+}
+
+// add the circles
+svg.selectAll('circle').data(transform(box, 0)).enter().append('circle')
+
+var circles = svg.selectAll('circle')
+
+
+d3.timer(function(t){
+  // t = 0
+  p.camera().focalLength(f).position([0, 0, f + 0.5])
+  circles.data(transform(box, t/10000)).sort(function(a, b){
+    return p.depth(a) - p.depth(b) 
+  })
+  .attr('cx', function(d){ return screenX(p.x(d)) })
+  .attr('cy', function(d){ return screenY(p.y(d)) })
+  .attr('r', function(d){ return p.scale(d) * r })
+  .style('opacity', function(d){ return (p.depth(d) + 3) / 1 })
+})
+
+svg.on('mousemove', function(){
+  f = viewport.height / (h - d3.mouse(this)[1])
+})
+
+
+    </script>
+  </body>
+</html>

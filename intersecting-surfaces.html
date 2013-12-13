@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="d3.js"></script>
+    <script src="jquery.js"></script>
+    <style>
+      body{ margin: 0; background-color: black;}
+    </style>
+  </head>
+  <body>
+    <script>
+      var w = window.innerWidth, h = window.innerHeight
+      var opacity = 0
+      var swap = function(){ return opacity = (opacity) ? 0: 1 }
+      var svg = d3.select('body').append('svg').attr({width:w, height: h})
+      
+      var rect1 = [ [491, 70], [943, 213], [913, 760], [528, 528] ]
+      svg.append('path').attr('d', d3.svg.line()(rect1))
+        .style('fill', '#0de702')
+
+      var rect2 = [ [271, 336], [1222, 299], [1195, 490], [303, 539]]
+      svg.append('path').attr('d', d3.svg.line()(rect2))
+        .style('fill', '#3301e7')
+
+      var rect1_above = svg.append('path').attr('d', d3.svg.line()(rect1))
+        .style('opacity', opacity)
+      svg.on('click', function(){
+        rect1_above.style('fill', '#0de702').style('opacity', opacity)
+          .transition().duration(1000).style('opacity', swap)
+      })
+
+      $(document).on('keydown', function (e) {
+        $(top.document)[0].onkeydown(e)
+      })
+
+    </script>
+  </body>
+</html>
